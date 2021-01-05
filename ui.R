@@ -1,6 +1,17 @@
 shinyUI(
     dashboardPagePlus(
 
+        # Add formatting
+        tags$head(
+            tags$style(
+                ".sidebar-toggle {font-size: 30px; padding: 1px;}",
+                ".main-sidebar {padding-top: 75px;}",
+                # ".main-header .sidebar-toggle {padding: 0px;}",
+                ".main-header .logo {height: 75px;}",
+                "i {font-size: 30px; padding: 1px;}" # color: red;
+            )
+        ),
+
         #----- Set header ------------------------------------------------------
         header = dashboardHeaderPlus(
             enable_rightsidebar = TRUE,
