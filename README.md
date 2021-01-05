@@ -1,4 +1,4 @@
-# Workout_app
+# WorkoutApp
 
 > In development 
 
