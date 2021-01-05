@@ -21,6 +21,36 @@ shinyUI(
         body = dashboardBody(
 
             #----- Setup warm-up -----------------------------------------------
+            box(width=3,
+                fluidRow(
+                    column(
+                        width=12, align="center",
+                        boxPad(
+                            color = "blue",
+                            descriptionBlock(
+                                header = "Warm-up",
+                                rightBorder = FALSE)),
+                        br(),
+                        knobInput(inputId = "warmup_length", label = "Length of warm-up (mins):",
+                                  value = 0, min = 0, max = 15,
+                                  displayPrevious = TRUE, #height = "100px",
+                                  lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"),
+                        knobInput(inputId = "warmup_number", label = "Number of exercises:",
+                                  value = 0, min = 0, max = n_warmup,
+                                  displayPrevious = TRUE, #height = "100px",
+                                  lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"),
+                        boxPad(
+                            color = "blue",
+                            descriptionBlock(
+                                header = textOutput("warmup_header"),
+                                text = htmlOutput("warmup_list"),
+                                rightBorder = FALSE),
+                            actionButton(inputId = "warmup_go", label = "Choose alternative exercises")
+                        )
+                    )
+                )
+
+            )
 
             #----- Setup workout -----------------------------------------------
 
