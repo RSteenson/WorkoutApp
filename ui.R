@@ -99,9 +99,37 @@ shinyUI(
                     )
                 )
 
-            )
-            #----- Setup cool-down ---------------------------------------------
+            ),
 
+            #----- Setup cool-down ---------------------------------------------
+            box(width=3,
+                fluidRow(
+                    column(
+                        width=12, align="center",
+                        boxPad(
+                            color = "blue",
+                            descriptionBlock(
+                                header = "Cool-down",
+                                rightBorder = FALSE)),
+                        br(),
+                        knobInput(inputId = "cooldown_length", label = "Length of cool-down (M):",
+                                  value = 0, min = 0, max = 15, step = 0.5,
+                                  displayPrevious = TRUE, #height = "100px",
+                                  lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"),
+                        knobInput(inputId = "cooldown_number", label = "Number of exercises:",
+                                  value = 0, min = 0, max = n_cooldown,
+                                  displayPrevious = TRUE, #height = "100px",
+                                  lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"),
+                        boxPad(
+                            color = "blue",
+                            htmlOutput("cooldown_header"),
+                            htmlOutput("cooldown_list"),
+                            actionButton(inputId = "cooldown_go", label = "Choose alternative exercises")
+                        )
+                    )
+                )
+
+            )
         )
     )
 )

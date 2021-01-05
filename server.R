@@ -6,17 +6,21 @@ shinyServer(function(input, output) {
     WU_rv <- reactiveValues(length = "", exercises = "")
 
     # Observe changes to the length of the warm-up
+    WU_length = reactive({
+        wu_length = seconds_to_period(input$cooldown_length * 60)
+        wu_length
+    })
     WU_ex_length = reactive({
         if(input$warmup_length > 0 & input$warmup_number > 0){
-            ex_length = round((input$warmup_length * 60) / input$warmup_number, digits=0)
-            ex_length = seconds_to_period(ex_length)
+            wu_ex_length = round((input$warmup_length * 60) / input$warmup_number, digits=0)
+            wu_ex_length = seconds_to_period(wu_ex_length)
         } else {
-            ex_length = "0S"
+            wu_ex_length = "0S"
         }
-        ex_length
+        wu_ex_length
     })
     observe({
-        WU_rv$length <- paste0("<h2>", input$warmup_length, "M</h2>",
+        WU_rv$length <- paste0("<h2>", WU_length(), "</h2>",
                                "<h4>", input$warmup_number, " exercises of ", WU_ex_length(), "</h4>")
     })
 
@@ -40,7 +44,6 @@ shinyServer(function(input, output) {
     # Create outputs
     output$warmup_header <- renderUI(HTML(WU_rv$length))
     output$warmup_list <- renderUI(HTML(WU_rv$exercises))
-
 
     #----- Set workout ---------------------------------------------------------
 
@@ -76,4 +79,48 @@ shinyServer(function(input, output) {
     output$workout_header <- renderUI(HTML(WO_rv$length))
     output$workout_list <- renderUI(HTML(WO_rv$exercises))
 
+    #----- Set cool-down -------------------------------------------------------
+
+    # Create reactive values object
+    CD_rv <- reactiveValues(length = "", exercises = "")
+
+    # Observe changes to the length of the warm-up
+    CD_length = reactive({
+        cd_length = seconds_to_period(input$cooldown_length * 60)
+        cd_length
+    })
+    CD_ex_length = reactive({
+        if(input$cooldown_length > 0 & input$cooldown_number > 0){
+            cd_ex_length = round((input$cooldown_length * 60) / input$cooldown_number, digits=0)
+            cd_ex_length = seconds_to_period(cd_ex_length)
+        } else {
+            cd_ex_length = "0M 0S"
+        }
+        cd_ex_length
+    })
+    observe({
+        CD_rv$length <- paste0("<h2>", CD_length(), "</h2>",
+                               "<h4>", input$cooldown_number, " exercises of ", CD_ex_length(), "</h4>")
+    })
+
+    # Observe changes to the number of warm-up exercises
+    observe({
+        cooldown <- set_exercises(n_ex = input$cooldown_number, cooldown = TRUE, type = NULL)
+        CD_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p></center>")
+    })
+
+    # If length of warm-up is set to 0, reset exercise list
+    # observeEvent(input$warmup_length == 0, {
+    #     WU_rv$exercises <- ""
+    # })
+
+    # If user clicks button, reselect warm-up exercises
+    observeEvent(input$cooldown_go, {
+        cooldown <- set_exercises(n_ex = input$cooldown_number, cooldown = TRUE, type = NULL)
+        CD_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p></center>")
+    })
+
+    # Create outputs
+    output$cooldown_header <- renderUI(HTML(CD_rv$length))
+    output$cooldown_list <- renderUI(HTML(CD_rv$exercises))
 })
