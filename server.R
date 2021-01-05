@@ -41,11 +41,11 @@ shinyServer(function(input, output) {
     WO_length = reactive({
         set_length = input$workout_number * (input$workout_ex_length + input$workout_rest_length)
         total_length = (set_length * input$workout_sets) + (input$workout_interim * (input$workout_sets - 1))
-        total_length = total_length/60
+        total_length = seconds_to_period(total_length)
         total_length
     })
     observe({
-        WO_rv$length <- paste0("<h2>", WO_length(), "mins</h2>",
+        WO_rv$length <- paste0("<h2>", WO_length(), "</h2>",
                                "<h4>", input$workout_sets, " sets of ", input$workout_number, " exercises @ ",
                                input$workout_ex_length, "s work : ", input$workout_rest_length, "s rest</h4>")
     })
