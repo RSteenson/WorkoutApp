@@ -22,7 +22,7 @@ set_exercises <- function(n_ex, warmup=FALSE, cooldown=FALSE, type=NULL){
     if(is.null(type)){
 
       ex_list <- exercises %>%
-        filter(Type != "Warm-up") %>%
+        filter(Type != "Warm-up" & Type != "Cool-down") %>%
         sample_n(size = n_ex)
 
     } else {
