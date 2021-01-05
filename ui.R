@@ -31,8 +31,8 @@ shinyUI(
                                 header = "Warm-up",
                                 rightBorder = FALSE)),
                         br(),
-                        knobInput(inputId = "warmup_length", label = "Length of warm-up (mins):",
-                                  value = 0, min = 0, max = 15,
+                        knobInput(inputId = "warmup_length", label = "Length of warm-up (M):",
+                                  value = 0, min = 0, max = 15, step = 0.5,
                                   displayPrevious = TRUE, #height = "100px",
                                   lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"),
                         knobInput(inputId = "warmup_number", label = "Number of exercises:",
@@ -41,10 +41,8 @@ shinyUI(
                                   lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"),
                         boxPad(
                             color = "blue",
-                            descriptionBlock(
-                                header = textOutput("warmup_header"),
-                                text = htmlOutput("warmup_list"),
-                                rightBorder = FALSE),
+                            htmlOutput("warmup_header"),
+                            htmlOutput("warmup_list"),
                             actionButton(inputId = "warmup_go", label = "Choose alternative exercises")
                         )
                     )
@@ -65,12 +63,12 @@ shinyUI(
                         br(),
                         fluidRow(
                             column(6,
-                                   knobInput(inputId = "workout_ex_length", label = "Length of exercise period (s):",
+                                   knobInput(inputId = "workout_ex_length", label = "Length of exercise period (S):",
                                              value = 40, min = 1, max = 120, step = 5,
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA")),
                             column(6,
-                                   knobInput(inputId = "workout_rest_length", label = "Length of rest period (s):",
+                                   knobInput(inputId = "workout_rest_length", label = "Length of rest period (S):",
                                              value = 20, min = 1, max = 120, step = 5,
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"))
@@ -87,7 +85,7 @@ shinyUI(
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA")),
                             column(4,
-                                   knobInput(inputId = "workout_interim", label = "Length of time between sets (s):",
+                                   knobInput(inputId = "workout_interim", label = "Length of time between sets (S):",
                                              value = 60, min = 1, max = 120, step = 5,
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"))

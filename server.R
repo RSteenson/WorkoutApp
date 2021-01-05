@@ -6,29 +6,39 @@ shinyServer(function(input, output) {
     WU_rv <- reactiveValues(length = "", exercises = "")
 
     # Observe changes to the length of the warm-up
+    WU_ex_length = reactive({
+        if(input$warmup_length > 0 & input$warmup_number > 0){
+            ex_length = round((input$warmup_length * 60) / input$warmup_number, digits=0)
+            ex_length = seconds_to_period(ex_length)
+        } else {
+            ex_length = "0S"
+        }
+        ex_length
+    })
     observe({
-        WU_rv$length <- paste0("Exercises (", input$warmup_length, "mins)")
+        WU_rv$length <- paste0("<h2>", input$warmup_length, "M</h2>",
+                               "<h4>", input$warmup_number, " exercises of ", WU_ex_length(), "</h4>")
     })
 
     # Observe changes to the number of warm-up exercises
     observe({
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<center><br>", paste0(warmup$Exercise, collapse = "<br>"), "<center>")
+        WU_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></p></center>")
     })
 
     # If length of warm-up is set to 0, reset exercise list
-    observeEvent(input$warmup_length == 0, {
-        WU_rv$exercises <- ""
-    })
+    # observeEvent(input$warmup_length == 0, {
+    #     WU_rv$exercises <- ""
+    # })
 
     # If user clicks button, reselect warm-up exercises
     observeEvent(input$warmup_go, {
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<center><br>", paste0(warmup$Exercise, collapse = "<br>"), "<center>")
+        WU_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></p></center>")
     })
 
     # Create outputs
-    output$warmup_header <- renderText(WU_rv$length)
+    output$warmup_header <- renderUI(HTML(WU_rv$length))
     output$warmup_list <- renderUI(HTML(WU_rv$exercises))
 
 
