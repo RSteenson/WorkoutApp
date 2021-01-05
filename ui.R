@@ -66,12 +66,12 @@ shinyUI(
                         fluidRow(
                             column(6,
                                    knobInput(inputId = "workout_ex_length", label = "Length of exercise period (s):",
-                                             value = 40, min = 1, max = 120,
+                                             value = 40, min = 1, max = 120, step = 5,
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA")),
                             column(6,
                                    knobInput(inputId = "workout_rest_length", label = "Length of rest period (s):",
-                                             value = 20, min = 1, max = 120,
+                                             value = 20, min = 1, max = 120, step = 5,
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"))
                         ),
@@ -88,7 +88,7 @@ shinyUI(
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA")),
                             column(4,
                                    knobInput(inputId = "workout_interim", label = "Length of time between sets (s):",
-                                             value = 60, min = 1, max = 120,
+                                             value = 60, min = 1, max = 120, step = 5,
                                              displayPrevious = TRUE, #height = "100px",
                                              lineCap = "round", fgColor = "#428BCA", inputColor = "#428BCA"))
                         ),
