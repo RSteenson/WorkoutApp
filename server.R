@@ -1,5 +1,10 @@
 shinyServer(function(input, output) {
 
+    #----- Set headings with HMTL ----------------------------------------------
+    output$WU_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Warm-up</span>")))
+    output$WO_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Workout</span>")))
+    output$CD_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Cool-down</span>")))
+
     #----- Set warm-up ---------------------------------------------------------
 
     # Create reactive values object
@@ -7,7 +12,7 @@ shinyServer(function(input, output) {
 
     # Observe changes to the length of the warm-up
     WU_length = reactive({
-        wu_length = seconds_to_period(input$cooldown_length * 60)
+        wu_length = seconds_to_period(input$warmup_length * 60)
         wu_length
     })
     WU_ex_length = reactive({
@@ -20,14 +25,14 @@ shinyServer(function(input, output) {
         wu_ex_length
     })
     observe({
-        WU_rv$length <- paste0("<h2>", WU_length(), "</h2>",
-                               "<h4>", input$warmup_number, " exercises of ", WU_ex_length(), "</h4>")
+        WU_rv$length <- paste0("<span style='font-size: 20px'>", WU_length(), "</span><br>",
+                               "<span style='font-size: 18px'>", input$warmup_number, " exercises of ", WU_ex_length(), " each</span>")
     })
 
     # Observe changes to the number of warm-up exercises
     observe({
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></p></center>")
+        WU_rv$exercises <- paste0("<span style='font-size: 16px'><i><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></i></span>")
     })
 
     # If length of warm-up is set to 0, reset exercise list
@@ -38,7 +43,7 @@ shinyServer(function(input, output) {
     # If user clicks button, reselect warm-up exercises
     observeEvent(input$warmup_go, {
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></p></center>")
+        WU_rv$exercises <- paste0("<span style='font-size: 16px'><i><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></i></span>")
     })
 
     # Create outputs
@@ -58,21 +63,21 @@ shinyServer(function(input, output) {
         total_length
     })
     observe({
-        WO_rv$length <- paste0("<h2>", WO_length(), "</h2>",
-                               "<h4>", input$workout_sets, " sets of ", input$workout_number, " exercises @ ",
-                               input$workout_ex_length, "s work : ", input$workout_rest_length, "s rest</h4>")
+        WO_rv$length <- paste0("<span style='font-size: 20px'>", WO_length(), "</span><br>",
+                               "<span style='font-size: 18px'>", input$workout_sets, " sets of ", input$workout_number, " exercises @ ",
+                               input$workout_ex_length, "s work : ", input$workout_rest_length, "s rest</span>")
     })
 
     # Observe changes to the number of workout exercises
     observe({
         workout <- set_exercises(n_ex = input$workout_number)
-        WO_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(workout$Exercise, collapse = "<br>"), "<br></p></center>")
+        WO_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(workout$Exercise, collapse = "<br>"), "<br></p>")
     })
 
     # If user clicks button, reselect workout exercises
     observeEvent(input$workout_go, {
         workout <- set_exercises(n_ex = input$workout_number)
-        WO_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(workout$Exercise, collapse = "<br>"), "<br></p></center>")
+        WO_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(workout$Exercise, collapse = "<br>"), "<br></p>")
     })
 
     # Create outputs
@@ -99,14 +104,14 @@ shinyServer(function(input, output) {
         cd_ex_length
     })
     observe({
-        CD_rv$length <- paste0("<h2>", CD_length(), "</h2>",
-                               "<h4>", input$cooldown_number, " exercises of ", CD_ex_length(), "</h4>")
+        CD_rv$length <- paste0("<span style='font-size: 20px'>", CD_length(), "</span><br>",
+                               "<span style='font-size: 18px'>", input$cooldown_number, " exercises of ", CD_ex_length(), "</span>")
     })
 
     # Observe changes to the number of warm-up exercises
     observe({
         cooldown <- set_exercises(n_ex = input$cooldown_number, cooldown = TRUE, type = NULL)
-        CD_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p></center>")
+        CD_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p>")
     })
 
     # If length of warm-up is set to 0, reset exercise list
@@ -117,7 +122,7 @@ shinyServer(function(input, output) {
     # If user clicks button, reselect warm-up exercises
     observeEvent(input$cooldown_go, {
         cooldown <- set_exercises(n_ex = input$cooldown_number, cooldown = TRUE, type = NULL)
-        CD_rv$exercises <- paste0("<center><p style='font-size: 17px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p></center>")
+        CD_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p>")
     })
 
     # Create outputs

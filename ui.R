@@ -27,9 +27,7 @@ shinyUI(
                         width=12, align="center",
                         boxPad(
                             color = "blue",
-                            descriptionBlock(
-                                header = "Warm-up",
-                                rightBorder = FALSE)),
+                            htmlOutput("WU_header")),
                         br(),
                         knobInput(inputId = "warmup_length", label = "Length of warm-up (M):",
                                   value = 0, min = 0, max = 15, step = 0.5,
@@ -43,6 +41,7 @@ shinyUI(
                             color = "blue",
                             htmlOutput("warmup_header"),
                             htmlOutput("warmup_list"),
+                            br(),
                             actionButton(inputId = "warmup_go", label = "Choose alternative exercises")
                         )
                     )
@@ -57,9 +56,7 @@ shinyUI(
                         width=12, align="center",
                         boxPad(
                             color = "blue",
-                            descriptionBlock(
-                                header = "Workout",
-                                rightBorder = FALSE)),
+                            htmlOutput("WO_header")),
                         br(),
                         fluidRow(
                             column(6,
@@ -94,6 +91,7 @@ shinyUI(
                             color = "blue",
                             htmlOutput("workout_header"),
                             htmlOutput("workout_list"),
+                            br(),
                             actionButton(inputId = "workout_go", label = "Choose alternative exercises")
                         )
                     )
@@ -108,9 +106,7 @@ shinyUI(
                         width=12, align="center",
                         boxPad(
                             color = "blue",
-                            descriptionBlock(
-                                header = "Cool-down",
-                                rightBorder = FALSE)),
+                            htmlOutput("CD_header")),
                         br(),
                         knobInput(inputId = "cooldown_length", label = "Length of cool-down (M):",
                                   value = 0, min = 0, max = 15, step = 0.5,
@@ -124,6 +120,7 @@ shinyUI(
                             color = "blue",
                             htmlOutput("cooldown_header"),
                             htmlOutput("cooldown_list"),
+                            br(),
                             actionButton(inputId = "cooldown_go", label = "Choose alternative exercises")
                         )
                     )
