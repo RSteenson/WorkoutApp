@@ -9,6 +9,7 @@ library(rmarkdown)
 library(htmltools)
 library(knitr)
 library(kableExtra)
+library(lubridate)
 
 # Load functions
 source("R/set_exercises.R")
