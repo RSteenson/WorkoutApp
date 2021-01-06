@@ -43,7 +43,7 @@ shinyUI(
                         fluidRow(
                             column(width=12, align="center",
                                    actionBttn(inputId = "move_to_workout", label = "Go to Workout",
-                                       style = "simple", color = "primary", size="lg"
+                                              style = "simple", color = "primary", size="lg"
                                    ))
                         ),
                         br(),
@@ -158,15 +158,27 @@ shinyUI(
 
                 #----- Begin workout tab ---------------------------------------
                 tabItem(tabName = "workout",
-                        actionBttn(inputId = "start_workout", label = "Start",
-                                   style = "simple", color = "primary", size="lg"),
-                        actionBttn(inputId = "pause_workout", label = "Pause",
-                                   style = "simple", color = "primary", size="lg"),
-                        textOutput("total_time"),
-                        textOutput("total_time_remaining")
+                        fluidRow(
+                            column(width=12, align="center",
+                                   actionBttn(inputId = "start_workout", label = "Start",
+                                              style = "simple", color = "primary", size="lg"),
+                                   actionBttn(inputId = "pause_workout", label = "Pause",
+                                              style = "simple", color = "primary", size="lg"),
+                                   br(),
+                                   htmlOutput("total_time"),
+                                   br()
+                            )
+                        ),
+                        fluidRow(
+                            column(width=4, align="center",
+                                   htmlOutput("total_time_remaining"),
+                                   htmlOutput("warmup_time_remaining"),
+                                   plotOutput("timer_plot", height="200px", width="200px")
+                            )
+                        )
                         # textOutput("ex_time_remaining")
 
-                        )
+                )
             )
         )
     )

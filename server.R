@@ -155,9 +155,11 @@ shinyServer(function(input, output, session) {
     #----- Create outputs for workout page -------------------------------------
 
     # Setup reactive values for timers
-    timer = reactiveValues(total_length = 0, time_remaining = 0, timer_active = FALSE)
+    timer = reactiveValues(total_length = 0, time_remaining = 0,
+                           warmup_remaining = 0, workout_remaining = 0,
+                           timer_active = FALSE)
 
-    # Set the reactive values based on user input
+    # Calculate the total time
     total_time = reactive({
         tt = 0
         if(input$warmup_length > 0){
@@ -172,27 +174,79 @@ shinyServer(function(input, output, session) {
         }
         tt
     })
+
+    # Calculate the workout time
+    workout_time = reactive({
+        wot = 0
+        if(WO_length() > 0){
+            wot = wot + ((input$workout_number * (input$workout_ex_length + input$workout_rest_length) *
+                            input$workout_sets) + (input$workout_interim * (input$workout_sets - 1)))
+        }
+        wot
+    })
+
+    # Set the timer reactive values based on user input
     observe({
         timer$total_length = total_time()
         timer$time_remaining = total_time()
-    })
+        timer$workout_remaining = workout_time()
+        timer$warmup_remaining = (input$warmup_length * 60)
+            })
 
     # Output the total time & times for each part
-    output$total_time <- renderText({
-        paste("Total workout length: ", seconds_to_period(timer$total_length))
+    output$total_time <- renderUI({
+        HTML(paste0("<span style='font-size: 18px'>Total workout length: ", seconds_to_period(timer$total_length), "</span>"))
     })
 
     # Output the time left.
-    output$total_time_remaining <- renderText({
-        paste("Time left: ", seconds_to_period(timer$time_remaining))
+    output$total_time_remaining <- renderUI({
+        HTML(paste0("<span style='font-size: 18px'>Total time left: ", seconds_to_period(timer$time_remaining), "</span>"))
+    })
+    output$warmup_time_remaining <- renderUI({
+        HTML(paste0("<span style='font-size: 18px'>Warmup remaining: ", seconds_to_period(timer$warmup_remaining), "</span>"))
+    })
+
+    # Create plot for output visualisation
+    output$timer_plot <- renderPlot({
+        invalidateLater(1000, session) # Refresh the chart every second
+        # Identify times
+        t <- timer$total_length
+        r <- timer$time_remaining
+        e <- t - r
+        wu <- timer$warmup_remaining
+        wo <- timer$workout_remaining
+        # Create df of times
+        df <- data.frame(status = c("elapsed", "remaining_warmup", "remaining_workout"), seconds = c(e, wu, wo))
+        df$fraction <- df$seconds/t
+        df$ymax = cumsum(df$fraction)
+        df$ymin = c(0, df$ymax[1], df$ymax[2])
+        # Produce plot
+        p = ggplot(df, aes(fill = status, ymax = ymax, ymin = ymin, xmax = 4, xmin = 2)) +
+            geom_rect(fill=c("#ECF0F5", "red", "#428bca")) + # colour="grey30", size=2
+            coord_polar(theta="y") +
+            xlim(c(0, 4)) +
+            theme_void() +
+            theme(panel.background = element_rect(fill = "#ECF0F5", color = "#ECF0F5"))
+        p
     })
 
     # observer that invalidates every second. If timer is active, decrease by one.
     observe({
         invalidateLater(1000, session)
         isolate({
+            # If timer is active, reduce all times by 1
             if(timer$timer_active == TRUE){
+                # Calculate new total time remaining
                 timer$time_remaining = timer$time_remaining -1
+
+                # If warm-up timer is finished, move onto subtracting from workouut timer
+                if(timer$warmup_remaining > 0){
+                    timer$warmup_remaining = timer$warmup_remaining -1
+                } else if (timer$warmup_remaining == 0){
+                    timer$workout_remaining = timer$workout_remaining -1
+                }
+
+                # If time remaining is 0, switch timer back to being inactive
                 if(timer$time_remaining < 1){
                     timer$timer_active = FALSE
                     showModal(modalDialog(
