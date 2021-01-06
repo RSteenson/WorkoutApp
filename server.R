@@ -1,4 +1,4 @@
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
     #----- Set headings with HMTL ----------------------------------------------
     output$WU_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Warm-up</span>")))
@@ -32,7 +32,7 @@ shinyServer(function(input, output) {
     # Observe changes to the number of warm-up exercises
     observe({
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<span style='font-size: 16px'><i><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></i></span>")
+        WU_rv$exercises <- paste0("<span style='font-size: 16px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></span>")
     })
 
     # If length of warm-up is set to 0, reset exercise list
@@ -43,7 +43,7 @@ shinyServer(function(input, output) {
     # If user clicks button, reselect warm-up exercises
     observeEvent(input$warmup_go, {
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<span style='font-size: 16px'><i><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></i></span>")
+        WU_rv$exercises <- paste0("<span style='font-size: 16px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></span>")
     })
 
     # Create outputs
@@ -128,4 +128,31 @@ shinyServer(function(input, output) {
     # Create outputs
     output$cooldown_header <- renderUI(HTML(CD_rv$length))
     output$cooldown_list <- renderUI(HTML(CD_rv$exercises))
-})
+
+    #----- Set checks for selected inputs --------------------------------------
+
+    # Create a confirmation box for movinng to the workout page
+    observeEvent(input$move_to_workout, {
+        confirmSweetAlert(
+            session,
+            inputId = "WO_confirmation",
+            title = "Ready to workout?",
+            text = tags$b(icon("dumbbell"), style = "color: #3a5fcd;"),
+            type = "question",
+            btn_labels = c("Cancel", "Confirm"),
+            btn_colors = NULL,
+            closeOnClickOutside = FALSE,
+            showCloseButton = FALSE,
+            html = TRUE
+        )
+    })
+
+    # Switch tabs following a confirm button
+    observeEvent(input$WO_confirmation, {
+        updateTabItems(session, "tabs", "workout")
+    })
+
+    #----- Create outputs for workout page -------------------------------------
+
+
+    })

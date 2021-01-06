@@ -22,6 +22,7 @@ shinyUI(
         sidebar = dashboardSidebar(
             width = "100px",
             sidebarMenu(
+                id = "tabs",
                 menuItem("", tabName = "setup", icon = icon("sliders-h")),
                 menuItem("", tabName = "workout", icon = icon("dumbbell"))
             )
@@ -37,6 +38,17 @@ shinyUI(
             #----- Begin setup tab ---------------------------------------------
             tabItems(
                 tabItem(tabName = "setup",
+
+                        #----- Add action button -------------------------------
+                        fluidRow(
+                            column(width=12, align="center",
+                                   actionBttn(
+                                       inputId = "move_to_workout",
+                                       label = "Go to Workout",
+                                       style = "simple", color = "primary", size="lg"
+                                   ))
+                        ),
+                        br(),
 
                         #----- Setup warm-up -----------------------------------
                         box(width=3,
@@ -146,6 +158,7 @@ shinyUI(
                         )
                 ),
                 tabItem(tabName = "workout"
+
                         )
             )
         )
