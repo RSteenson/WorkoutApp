@@ -42,9 +42,7 @@ shinyUI(
                         #----- Add action button -------------------------------
                         fluidRow(
                             column(width=12, align="center",
-                                   actionBttn(
-                                       inputId = "move_to_workout",
-                                       label = "Go to Workout",
+                                   actionBttn(inputId = "move_to_workout", label = "Go to Workout",
                                        style = "simple", color = "primary", size="lg"
                                    ))
                         ),
@@ -157,7 +155,16 @@ shinyUI(
                             )
                         )
                 ),
-                tabItem(tabName = "workout"
+
+                #----- Begin workout tab ---------------------------------------
+                tabItem(tabName = "workout",
+                        actionBttn(inputId = "start_workout", label = "Start",
+                                   style = "simple", color = "primary", size="lg"),
+                        actionBttn(inputId = "pause_workout", label = "Pause",
+                                   style = "simple", color = "primary", size="lg"),
+                        textOutput("total_time"),
+                        textOutput("total_time_remaining")
+                        # textOutput("ex_time_remaining")
 
                         )
             )

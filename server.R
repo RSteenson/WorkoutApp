@@ -154,5 +154,77 @@ shinyServer(function(input, output, session) {
 
     #----- Create outputs for workout page -------------------------------------
 
+    # Setup reactive values for timers
+    timer = reactiveValues(total_length = 0, time_remaining = 0, timer_active = FALSE)
+
+    # Set the reactive values based on user input
+    total_time = reactive({
+        tt = 0
+        if(input$warmup_length > 0){
+            tt = tt + (input$warmup_length * 60)
+        }
+        if(WO_length() > 0){
+            tt = tt + ((input$workout_number * (input$workout_ex_length + input$workout_rest_length) *
+                           input$workout_sets) + (input$workout_interim * (input$workout_sets - 1)))
+        }
+        if(input$cooldown_length > 0){
+            tt = tt + (input$cooldown_length * 60)
+        }
+        tt
+    })
+    observe({
+        timer$total_length = total_time()
+        timer$time_remaining = total_time()
+    })
+
+    # Output the total time & times for each part
+    output$total_time <- renderText({
+        paste("Total workout length: ", seconds_to_period(timer$total_length))
+    })
+
+    # Output the time left.
+    output$total_time_remaining <- renderText({
+        paste("Time left: ", seconds_to_period(timer$time_remaining))
+    })
+
+    # observer that invalidates every second. If timer is active, decrease by one.
+    observe({
+        invalidateLater(1000, session)
+        isolate({
+            if(timer$timer_active == TRUE){
+                timer$time_remaining = timer$time_remaining -1
+                if(timer$time_remaining < 1){
+                    timer$timer_active = FALSE
+                    showModal(modalDialog(
+                        title = "Important message",
+                        "Workout completed!"))
+                }
+            }
+        })
+    })
+
+    # Observers for action buttons
+    observeEvent(input$start_workout, {
+        timer$timer_active = TRUE
+        })
+    observeEvent(input$pause_workout, {
+        timer$timer_active = FALSE
+        })
+
+    # Create sweet alert for alerting when workout exercises are not selected
+    # observeEvent(input$warning, {
+    #     sendSweetAlert(
+    #         session = session,
+    #         title = "Warning !!!",
+    #         text = NULL,
+    #         type = "warning"
+    #     )
+    # })
+    # warmup %>%
+    #     select(Exercise, Description) %>%
+    #     kable(col.names = NULL, escape = FALSE) %>%
+    #     kable_styling(bootstrap_options = "condensed", full_width = TRUE, font_size = 18) %>%
+    #     column_spec(1, bold = TRUE, border_right = TRUE) %>%
+    #     column_spec(2, italic = TRUE)
 
     })
