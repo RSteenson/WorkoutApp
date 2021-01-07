@@ -8,31 +8,30 @@ shinyServer(function(input, output, session) {
     #----- Set warm-up ---------------------------------------------------------
 
     # Create reactive values object
-    WU_rv <- reactiveValues(length = "", exercises = "")
+    WU_rv <- reactiveValues(length = c(), exercises = c(), descriptions=c())
 
     # Observe changes to the length of the warm-up
     WU_length = reactive({
-        wu_length = seconds_to_period(input$warmup_length * 60)
-        wu_length
+        input$warmup_length * 60
     })
     WU_ex_length = reactive({
         if(input$warmup_length > 0 & input$warmup_number > 0){
             wu_ex_length = round((input$warmup_length * 60) / input$warmup_number, digits=0)
-            wu_ex_length = seconds_to_period(wu_ex_length)
         } else {
-            wu_ex_length = "0S"
+            wu_ex_length = 0
         }
         wu_ex_length
     })
     observe({
-        WU_rv$length <- paste0("<span style='font-size: 20px'>", WU_length(), "</span><br>",
-                               "<span style='font-size: 18px'>", input$warmup_number, " exercises of ", WU_ex_length(), " each</span>")
+        WU_rv$length <- paste0("<span style='font-size: 20px'>", seconds_to_period(WU_length()), "</span><br>",
+                               "<span style='font-size: 18px'>", input$warmup_number, " exercises of ", seconds_to_period(WU_ex_length()), " each</span>")
     })
 
     # Observe changes to the number of warm-up exercises
     observe({
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<span style='font-size: 16px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></span>")
+        WU_rv$exercises <- warmup$Exercise
+        WU_rv$descriptions <- warmup$Description
     })
 
     # If length of warm-up is set to 0, reset exercise list
@@ -43,12 +42,13 @@ shinyServer(function(input, output, session) {
     # If user clicks button, reselect warm-up exercises
     observeEvent(input$warmup_go, {
         warmup <- set_exercises(n_ex = as.numeric(input$warmup_number), warmup = TRUE, type = NULL)
-        WU_rv$exercises <- paste0("<span style='font-size: 16px'><br>", paste0(warmup$Exercise, collapse = "<br>"), "<br></span>")
+        WU_rv$exercises <- warmup$Exercise
+        WU_rv$descriptions <- warmup$Description
     })
 
     # Create outputs
     output$warmup_header <- renderUI(HTML(WU_rv$length))
-    output$warmup_list <- renderUI(HTML(WU_rv$exercises))
+    output$warmup_list <- renderUI(HTML(paste0("<span style='font-size: 16px'><br>", paste0(WU_rv$exercises, collapse = "<br>"), "<br></span>")))
 
     #----- Set workout ---------------------------------------------------------
 
@@ -308,22 +308,33 @@ shinyServer(function(input, output, session) {
     # Create dataframe with all exercises
     full_ex_list <- reactive({
         all_ex <- data.frame()
-        # if(input$warmup_number > 0){
-        #     warmup$ex_time = 20 # WU_ex_length()
-        #     all_ex <- rbind(all_ex, warmup)
-        # }
+        if(input$warmup_number > 0){
+            # Create dataframe from objects
+            WU_df = data.frame(Type="Warm-up",
+                               Exercise = WU_rv$exercises,
+                               Description = WU_rv$descriptions,
+                               ex_time = WU_ex_length())
+            all_ex <- rbind(all_ex, WU_df)
+        }
         if(input$workout_number > 0){
             # Create dataframe from objects
-            WO_df = data.frame(Exercise = WO_rv$exercises,
+            WO_df = data.frame(Type="Workout",
+                               Exercise = WO_rv$exercises,
                                Description = WO_rv$descriptions,
                                ex_time = input$workout_ex_length)
-            for(i in 1:nrow(WO_df)){
-                WO_df_sub <- rbind(WO_df[i,],
-                                   data.frame(Exercise="Break", Description="", ex_time=input$workout_rest_length))
-                if(i==1){
-                    WO_br_df <- WO_df_sub
-                } else {
-                    WO_br_df <- rbind(WO_br_df, WO_df_sub)
+            # Add in rest periods between
+            if(input$workout_rest_length > 0){
+                for(i in 1:nrow(WO_df)){
+                    WO_df_sub <- rbind(WO_df[i,],
+                                       data.frame(Type="Workout",
+                                                  Exercise="Break",
+                                                  Description="",
+                                                  ex_time=input$workout_rest_length))
+                    if(i==1){
+                        WO_br_df <- WO_df_sub
+                    } else {
+                        WO_br_df <- rbind(WO_br_df, WO_df_sub)
+                    }
                 }
             }
             all_ex <- rbind(all_ex, WO_br_df)
@@ -355,7 +366,7 @@ shinyServer(function(input, output, session) {
 
     # Create text output for all exercises
     output$all_exercises <- renderTable({
-        dplyr::select(full_ex_list(), Exercise, Description) %>%
+        dplyr::select(full_ex_list(), Type, Exercise, Description) %>%
             filter(Exercise != "Break")
     })
 
