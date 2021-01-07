@@ -175,6 +175,8 @@ shinyUI(
                             column(width=4, align="center",
                                    htmlOutput("total_time_remaining"),
                                    htmlOutput("warmup_time_remaining"),
+                                   htmlOutput("workout_time_remaining"),
+                                   htmlOutput("cooldown_time_remaining"),
                                    plotOutput("timer_plot", height="200px", width="200px")
                             )
                         )

@@ -158,7 +158,7 @@ shinyServer(function(input, output, session) {
 
     # Setup reactive values for timers
     timer = reactiveValues(total_length = 0, time_remaining = 0,
-                           warmup_remaining = 0, workout_remaining = 0,
+                           warmup_remaining = 0, workout_remaining = 0, cooldown_remaining = 0,
                            timer_active = FALSE)
 
     # Calculate the total time
@@ -193,6 +193,7 @@ shinyServer(function(input, output, session) {
         timer$time_remaining = total_time()
         timer$workout_remaining = workout_time()
         timer$warmup_remaining = (input$warmup_length * 60)
+        timer$cooldown_remaining = (input$cooldown_length * 60)
             })
 
     # Output the total time & times for each part
@@ -207,6 +208,12 @@ shinyServer(function(input, output, session) {
     output$warmup_time_remaining <- renderUI({
         HTML(paste0("<span style='font-size: 18px'>Warmup remaining: ", seconds_to_period(timer$warmup_remaining), "</span>"))
     })
+    output$workout_time_remaining <- renderUI({
+        HTML(paste0("<span style='font-size: 18px'>Workout remaining: ", seconds_to_period(timer$workout_remaining), "</span>"))
+    })
+    output$cooldown_time_remaining <- renderUI({
+        HTML(paste0("<span style='font-size: 18px'>Cooldown remaining: ", seconds_to_period(timer$cooldown_remaining), "</span>"))
+    })
 
     # Create plot for output visualisation
     output$timer_plot <- renderPlot({
@@ -217,14 +224,16 @@ shinyServer(function(input, output, session) {
         e <- t - r
         wu <- timer$warmup_remaining
         wo <- timer$workout_remaining
+        cd <- timer$cooldown_remaining
         # Create df of times
-        df <- data.frame(status = c("elapsed", "remaining_warmup", "remaining_workout"), seconds = c(e, wu, wo))
+        df <- data.frame(status = c("elapsed", "remaining_warmup", "remaining_workout", "remaining_cooldown"),
+                         seconds = c(e, wu, wo, cd))
         df$fraction <- df$seconds/t
         df$ymax = cumsum(df$fraction)
-        df$ymin = c(0, df$ymax[1], df$ymax[2])
+        df$ymin = c(0, df$ymax[1], df$ymax[2], df$ymax[3])
         # Produce plot
         p = ggplot(df, aes(fill = status, ymax = ymax, ymin = ymin, xmax = 4, xmin = 2)) +
-            geom_rect(fill=c("#ECF0F5", "red", "#428bca")) + # colour="grey30", size=2
+            geom_rect(fill=c("#ECF0F5", "red", "#428bca", "green")) + # colour="grey30", size=2
             coord_polar(theta="y") +
             xlim(c(0, 4)) +
             theme_void() +
@@ -244,8 +253,10 @@ shinyServer(function(input, output, session) {
                 # If warm-up timer is finished, move onto subtracting from workouut timer
                 if(timer$warmup_remaining > 0){
                     timer$warmup_remaining = timer$warmup_remaining -1
-                } else if (timer$warmup_remaining == 0){
+                } else if (timer$warmup_remaining == 0 & timer$workout_remaining > 0){
                     timer$workout_remaining = timer$workout_remaining -1
+                } else if (timer$workout_remaining == 0){
+                    timer$cooldown_remaining = timer$cooldown_remaining -1
                 }
 
                 # If time remaining is 0, switch timer back to being inactive
