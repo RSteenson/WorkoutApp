@@ -10,6 +10,7 @@ library(htmltools)
 library(knitr)
 library(kableExtra)
 library(lubridate)
+library(ggplot2)
 
 # Load functions
 source("R/set_exercises.R")
