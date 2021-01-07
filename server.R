@@ -131,7 +131,7 @@ shinyServer(function(input, output, session) {
 
     #----- Set checks for selected inputs --------------------------------------
 
-    # Create a confirmation box for movinng to the workout page
+    # Create a confirmation box for moving to the workout page
     observeEvent(input$move_to_workout, {
         confirmSweetAlert(
             session,
@@ -149,7 +149,9 @@ shinyServer(function(input, output, session) {
 
     # Switch tabs following a confirm button
     observeEvent(input$WO_confirmation, {
-        updateTabItems(session, "tabs", "workout")
+        if(input$WO_confirmation == TRUE){
+            updateTabItems(session, "tabs", "workout")
+        }
     })
 
     #----- Create outputs for workout page -------------------------------------
@@ -264,6 +266,31 @@ shinyServer(function(input, output, session) {
     observeEvent(input$pause_workout, {
         timer$timer_active = FALSE
         })
+
+    #---- Create system to return to setup page --------------------------------
+
+    # Create a confirmation box for moving to the workout page
+    observeEvent(input$return_setup, {
+        confirmSweetAlert(
+            session,
+            inputId = "setup_confirmation",
+            title = "Are you sure you want to return to setup?",
+            text = tags$b(icon("sliders-h"), style = "color: #3a5fcd;"),
+            type = "question",
+            btn_labels = c("Cancel", "Confirm"),
+            btn_colors = NULL,
+            closeOnClickOutside = FALSE,
+            showCloseButton = FALSE,
+            html = TRUE
+        )
+    })
+
+    # Switch tabs following a confirm button
+    observeEvent(input$setup_confirmation, {
+        if(input$setup_confirmation == TRUE){
+            updateTabItems(session, "tabs", "setup")
+        }
+    })
 
     # Create sweet alert for alerting when workout exercises are not selected
     # observeEvent(input$warning, {

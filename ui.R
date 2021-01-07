@@ -35,11 +35,11 @@ shinyUI(
         #----- Set body --------------------------------------------------------
         body = dashboardBody(
 
-            #----- Begin setup tab ---------------------------------------------
+            #----- Begin setup tab
             tabItems(
                 tabItem(tabName = "setup",
 
-                        #----- Add action button -------------------------------
+                        #----- Add action button
                         fluidRow(
                             column(width=12, align="center",
                                    actionBttn(inputId = "move_to_workout", label = "Go to Workout",
@@ -48,7 +48,7 @@ shinyUI(
                         ),
                         br(),
 
-                        #----- Setup warm-up -----------------------------------
+                        #----- Setup warm-up
                         box(width=3,
                             fluidRow(
                                 column(
@@ -77,7 +77,7 @@ shinyUI(
 
                         ),
 
-                        #----- Setup workout -----------------------------------
+                        #----- Setup workout
                         box(width=6,
                             fluidRow(
                                 column(
@@ -127,7 +127,7 @@ shinyUI(
 
                         ),
 
-                        #----- Setup cool-down ---------------------------------
+                        #----- Setup cool-down
                         box(width=3,
                             fluidRow(
                                 column(
@@ -164,6 +164,8 @@ shinyUI(
                                               style = "simple", color = "primary", size="lg"),
                                    actionBttn(inputId = "pause_workout", label = "Pause",
                                               style = "simple", color = "primary", size="lg"),
+                                   actionBttn(inputId = "return_setup", label = "Go back to setup",
+                                              style = "simple", color = "warning", size="lg"),
                                    br(),
                                    htmlOutput("total_time"),
                                    br()
