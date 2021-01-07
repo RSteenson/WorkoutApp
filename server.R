@@ -53,7 +53,7 @@ shinyServer(function(input, output, session) {
     #----- Set workout ---------------------------------------------------------
 
     # Create reactive values object
-    WO_rv <- reactiveValues(length = "", exercises = "")
+    WO_rv <- reactiveValues(length = c(), exercises = c(), descriptions=c())
 
     # Observe changes to the total length of the main workout
     WO_length = reactive({
@@ -71,18 +71,20 @@ shinyServer(function(input, output, session) {
     # Observe changes to the number of workout exercises
     observe({
         workout <- set_exercises(n_ex = input$workout_number)
-        WO_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(workout$Exercise, collapse = "<br>"), "<br></p>")
+        WO_rv$exercises <- workout$Exercise
+        WO_rv$descriptions <- workout$Description
     })
 
     # If user clicks button, reselect workout exercises
     observeEvent(input$workout_go, {
         workout <- set_exercises(n_ex = input$workout_number)
-        WO_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(workout$Exercise, collapse = "<br>"), "<br></p>")
+        WO_rv$exercises <- workout$Exercise
+        WO_rv$descriptions <- workout$Description
     })
 
     # Create outputs
     output$workout_header <- renderUI(HTML(WO_rv$length))
-    output$workout_list <- renderUI(HTML(WO_rv$exercises))
+    output$workout_list <- renderUI(HTML(paste0("<p style='font-size: 16px'><br>", paste0(WO_rv$exercises, collapse = "<br>"), "<br></p>")))
 
     #----- Set cool-down -------------------------------------------------------
 
@@ -129,7 +131,7 @@ shinyServer(function(input, output, session) {
     output$cooldown_header <- renderUI(HTML(CD_rv$length))
     output$cooldown_list <- renderUI(HTML(CD_rv$exercises))
 
-    #----- Set checks for selected inputs --------------------------------------
+    #----- Switch tabs ---------------------------------------------------------
 
     # Create a confirmation box for moving to the workout page
     observeEvent(input$move_to_workout, {
@@ -154,7 +156,30 @@ shinyServer(function(input, output, session) {
         }
     })
 
-    #----- Create outputs for workout page -------------------------------------
+    # Create a confirmation box for moving to the workout page
+    observeEvent(input$return_setup, {
+        confirmSweetAlert(
+            session,
+            inputId = "setup_confirmation",
+            title = "Are you sure you want to return to setup?",
+            text = tags$b(icon("sliders-h"), style = "color: #3a5fcd;"),
+            type = "question",
+            btn_labels = c("Cancel", "Confirm"),
+            btn_colors = NULL,
+            closeOnClickOutside = FALSE,
+            showCloseButton = FALSE,
+            html = TRUE
+        )
+    })
+
+    # Switch tabs following a confirm button
+    observeEvent(input$setup_confirmation, {
+        if(input$setup_confirmation == TRUE){
+            updateTabItems(session, "tabs", "setup")
+        }
+    })
+
+    #----- Create timers for workout page --------------------------------------
 
     # Setup reactive values for timers
     timer = reactiveValues(total_length = 0, time_remaining = 0,
@@ -278,29 +303,60 @@ shinyServer(function(input, output, session) {
         timer$timer_active = FALSE
         })
 
-    #---- Create system to return to setup page --------------------------------
+    #----- Create outputs for workout page -------------------------------------
 
-    # Create a confirmation box for moving to the workout page
-    observeEvent(input$return_setup, {
-        confirmSweetAlert(
-            session,
-            inputId = "setup_confirmation",
-            title = "Are you sure you want to return to setup?",
-            text = tags$b(icon("sliders-h"), style = "color: #3a5fcd;"),
-            type = "question",
-            btn_labels = c("Cancel", "Confirm"),
-            btn_colors = NULL,
-            closeOnClickOutside = FALSE,
-            showCloseButton = FALSE,
-            html = TRUE
-        )
+    # Create dataframe with all exercises
+    full_ex_list <- reactive({
+        all_ex <- data.frame()
+        # if(input$warmup_number > 0){
+        #     warmup$ex_time = 20 # WU_ex_length()
+        #     all_ex <- rbind(all_ex, warmup)
+        # }
+        if(input$workout_number > 0){
+            # Create dataframe from objects
+            WO_df = data.frame(Exercise = WO_rv$exercises,
+                               Description = WO_rv$descriptions,
+                               ex_time = input$workout_ex_length)
+            for(i in 1:nrow(WO_df)){
+                WO_df_sub <- rbind(WO_df[i,],
+                                   data.frame(Exercise="Break", Description="", ex_time=input$workout_rest_length))
+                if(i==1){
+                    WO_br_df <- WO_df_sub
+                } else {
+                    WO_br_df <- rbind(WO_br_df, WO_df_sub)
+                }
+            }
+            all_ex <- rbind(all_ex, WO_br_df)
+        }
+        # if(input$cooldown_number > 0){
+        #     cooldown$ex_time = 40 # CD_ex_length()
+        #     all_ex <- rbind(all_ex, cooldown)
+        # }
+        # Calculate start and stop of each exercise
+        all_ex$sum = cumsum(all_ex$ex_time)
+        all_ex$end = timer$total_length - all_ex$sum
+        all_ex$start = all_ex$end + all_ex$ex_time
+
+        all_ex
     })
 
-    # Switch tabs following a confirm button
-    observeEvent(input$setup_confirmation, {
-        if(input$setup_confirmation == TRUE){
-            updateTabItems(session, "tabs", "setup")
-        }
+    # Extract current exercise
+    current_exercise <- reactive({
+        full_ex_list()[which(full_ex_list()$start >= timer$time_remaining &
+                                 full_ex_list()$end < timer$time_remaining),]
+    })
+
+    # Create text output for current exercise
+    output$current_exercise <- renderUI({
+        HTML(paste0("<span style='font-size: 30px'>Current exercise:</span><br>",
+                    "<span style='font-size: 22px'>", current_exercise()$Exercise, "</span><br><br>",
+                    "<span style='font-size: 16px'>", current_exercise()$Description, "</span>"))
+    })
+
+    # Create text output for all exercises
+    output$all_exercises <- renderTable({
+        dplyr::select(full_ex_list(), Exercise, Description) %>%
+            filter(Exercise != "Break")
     })
 
     # Create sweet alert for alerting when workout exercises are not selected

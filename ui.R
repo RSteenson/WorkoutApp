@@ -8,7 +8,8 @@ shinyUI(
                 ".main-sidebar {padding-top: 75px;}",
                 # ".main-header .sidebar-toggle {padding: 0px;}",
                 ".main-header .logo {height: 75px;}",
-                "i {font-size: 30px; padding: 1px;}" # color: red;
+                "i {font-size: 30px; padding: 1px;}", # color: red;
+                "hr {border: 2px solid blue}"
             )
         ),
 
@@ -178,7 +179,13 @@ shinyUI(
                                    htmlOutput("workout_time_remaining"),
                                    htmlOutput("cooldown_time_remaining"),
                                    plotOutput("timer_plot", height="200px", width="200px")
-                            )
+                            ),
+                            column(width=8, align="center",
+                                   br(),
+                                   htmlOutput("current_exercise"),
+                                   hr(),
+                                   tableOutput("all_exercises")
+                                   )
                         )
                         # textOutput("ex_time_remaining")
 
