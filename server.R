@@ -314,6 +314,7 @@ shinyServer(function(input, output, session) {
                                Exercise = WU_rv$exercises,
                                Description = WU_rv$descriptions,
                                ex_time = WU_ex_length())
+            WU_df$next_ex = c(WU_df$Exercise[2:nrow(WU_df)], "")
             all_ex <- rbind(all_ex, WU_df)
         }
         if(input$workout_number > 0){
@@ -337,6 +338,7 @@ shinyServer(function(input, output, session) {
                     }
                 }
             }
+            WO_br_df$next_ex = c(WO_br_df$Exercise[2:nrow(WO_br_df)], "")
             all_ex <- rbind(all_ex, WO_br_df)
         }
         # if(input$cooldown_number > 0){
@@ -361,7 +363,9 @@ shinyServer(function(input, output, session) {
     output$current_exercise <- renderUI({
         HTML(paste0("<span style='font-size: 30px'>Current exercise:</span><br>",
                     "<span style='font-size: 22px'>", current_exercise()$Exercise, "</span><br><br>",
-                    "<span style='font-size: 16px'>", current_exercise()$Description, "</span>"))
+                    "<span style='font-size: 16px'>", current_exercise()$Description, "</span><br><br>",
+                    "<span style='font-size: 30px'>Up next:</span><br>",
+                    "<span style='font-size: 22px'>", current_exercise()$next_ex, "</span><br><br>"))
     })
 
     # Create text output for all exercises
