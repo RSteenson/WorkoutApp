@@ -89,7 +89,7 @@ shinyServer(function(input, output, session) {
     #----- Set cool-down -------------------------------------------------------
 
     # Create reactive values object
-    CD_rv <- reactiveValues(length = "", exercises = "")
+    CD_rv <- reactiveValues(length = c(), exercises = c(), descriptions=c())
 
     # Observe changes to the length of the warm-up
     CD_length = reactive({
@@ -99,21 +99,22 @@ shinyServer(function(input, output, session) {
     CD_ex_length = reactive({
         if(input$cooldown_length > 0 & input$cooldown_number > 0){
             cd_ex_length = round((input$cooldown_length * 60) / input$cooldown_number, digits=0)
-            cd_ex_length = seconds_to_period(cd_ex_length)
+            cd_ex_length = cd_ex_length
         } else {
-            cd_ex_length = "0M 0S"
+            cd_ex_length = 0
         }
         cd_ex_length
     })
     observe({
         CD_rv$length <- paste0("<span style='font-size: 20px'>", CD_length(), "</span><br>",
-                               "<span style='font-size: 18px'>", input$cooldown_number, " exercises of ", CD_ex_length(), "</span>")
+                               "<span style='font-size: 18px'>", input$cooldown_number, " exercises of ", seconds_to_period(CD_ex_length()), "</span>")
     })
 
     # Observe changes to the number of warm-up exercises
     observe({
         cooldown <- set_exercises(n_ex = input$cooldown_number, cooldown = TRUE, type = NULL)
-        CD_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p>")
+        CD_rv$exercises <- cooldown$Exercise
+        CD_rv$descriptions <- cooldown$Description
     })
 
     # If length of warm-up is set to 0, reset exercise list
@@ -124,12 +125,13 @@ shinyServer(function(input, output, session) {
     # If user clicks button, reselect warm-up exercises
     observeEvent(input$cooldown_go, {
         cooldown <- set_exercises(n_ex = input$cooldown_number, cooldown = TRUE, type = NULL)
-        CD_rv$exercises <- paste0("<p style='font-size: 16px'><br>", paste0(cooldown$Exercise, collapse = "<br>"), "<br></p>")
+        CD_rv$exercises <- cooldown$Exercise
+        CD_rv$descriptions <- cooldown$Description
     })
 
     # Create outputs
     output$cooldown_header <- renderUI(HTML(CD_rv$length))
-    output$cooldown_list <- renderUI(HTML(CD_rv$exercises))
+    output$cooldown_list <- renderUI(HTML(paste0("<p style='font-size: 16px'><br>", paste0(CD_rv$exercises, collapse = "<br>"), "<br></p>")))
 
     #----- Switch tabs ---------------------------------------------------------
 
@@ -315,7 +317,6 @@ shinyServer(function(input, output, session) {
                                Exercise = WU_rv$exercises,
                                Description = WU_rv$descriptions,
                                ex_time = WU_ex_length())
-            # WU_df$next_ex = c(WU_df$Exercise[2:nrow(WU_df)], "")
             all_ex <- rbind(all_ex, WU_df)
         }
         if(input$workout_number > 0){
@@ -339,10 +340,16 @@ shinyServer(function(input, output, session) {
                     }
                 }
             }
-            # WO_br_df$next_ex = c(WO_br_df$Exercise[2:nrow(WO_br_df)], "")
             all_ex <- rbind(all_ex, WO_br_df)
         }
-
+        if(input$cooldown_number > 0){
+            # Create dataframe from objects
+            CD_df = data.frame(Type="Cool-down",
+                               Exercise = CD_rv$exercises,
+                               Description = CD_rv$descriptions,
+                               ex_time = CD_ex_length())
+            all_ex <- rbind(all_ex, CD_df)
+        }
         # Add info on next exercise for non-break rows
         all_ex$next_ex <- ""
         ex_rows = which(all_ex$Type != "Break")
