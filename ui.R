@@ -36,7 +36,7 @@ shinyUI(
         #----- Set body --------------------------------------------------------
         body = dashboardBody(
 
-            #----- Begin setup tab
+            #----- Begin setup tab ---------------------------------------------
             tabItems(
                 tabItem(tabName = "setup",
 
@@ -160,27 +160,25 @@ shinyUI(
                 #----- Begin workout tab ---------------------------------------
                 tabItem(tabName = "workout",
                         fluidRow(
-                            column(width=12, align="center",
+                            column(width=3, align="center",
+                                   br(), br(),
                                    actionBttn(inputId = "start_workout", label = "Start",
                                               style = "simple", color = "primary", size="lg"),
                                    actionBttn(inputId = "pause_workout", label = "Pause",
                                               style = "simple", color = "primary", size="lg"),
-                                   actionBttn(inputId = "return_setup", label = "Go back to setup",
-                                              style = "simple", color = "warning", size="lg"),
-                                   br(),
-                                   htmlOutput("total_time"),
-                                   br()
-                            )
-                        ),
-                        fluidRow(
-                            column(width=4, align="center",
+                                   br(), br(),
                                    htmlOutput("total_time_remaining"),
-                                   htmlOutput("warmup_time_remaining"),
-                                   htmlOutput("workout_time_remaining"),
-                                   htmlOutput("cooldown_time_remaining"),
-                                   plotOutput("timer_plot", height="200px", width="200px")
+                                   br(),
+                                   # htmlOutput("total_time"),
+                                   # htmlOutput("warmup_time_remaining"),
+                                   # htmlOutput("workout_time_remaining"),
+                                   # htmlOutput("cooldown_time_remaining"),
+                                   plotOutput("timer_plot", height="200px", width="200px"),
+                                   br(), br(),
+                                   actionBttn(inputId = "return_setup", label = "Go back to setup",
+                                              style = "simple", color = "primary", size="lg")
                             ),
-                            column(width=8, align="center",
+                            column(width=9, align="center",
                                    br(),
                                    htmlOutput("current_exercise"),
                                    hr(),
