@@ -315,7 +315,7 @@ shinyServer(function(input, output, session) {
                                Exercise = WU_rv$exercises,
                                Description = WU_rv$descriptions,
                                ex_time = WU_ex_length())
-            WU_df$next_ex = c(WU_df$Exercise[2:nrow(WU_df)], "")
+            # WU_df$next_ex = c(WU_df$Exercise[2:nrow(WU_df)], "")
             all_ex <- rbind(all_ex, WU_df)
         }
         if(input$workout_number > 0){
@@ -328,10 +328,10 @@ shinyServer(function(input, output, session) {
             if(input$workout_rest_length > 0){
                 for(i in 1:nrow(WO_df)){
                     WO_df_sub <- rbind(WO_df[i,],
-                                       data.frame(Type="Workout",
+                                       data.frame(Type="Break",
                                                   Exercise="Break",
                                                   Description="",
-                                                  ex_time=input$workout_rest_length))
+                                                  ex_time=30))
                     if(i==1){
                         WO_br_df <- WO_df_sub
                     } else {
@@ -339,8 +339,26 @@ shinyServer(function(input, output, session) {
                     }
                 }
             }
-            WO_br_df$next_ex = c(WO_br_df$Exercise[2:nrow(WO_br_df)], "")
+            # WO_br_df$next_ex = c(WO_br_df$Exercise[2:nrow(WO_br_df)], "")
             all_ex <- rbind(all_ex, WO_br_df)
+        }
+
+        # Add info on next exercise for non-break rows
+        all_ex$next_ex <- ""
+        ex_rows = which(all_ex$Type != "Break")
+        for(i in ex_rows){
+            if(i == ex_rows[length(ex_rows)]){
+                all_ex$next_ex[i] <- ""
+            } else if(all_ex$Type[i] %in% c("Warm-up", "Cool-down")){
+                all_ex$next_ex[i] <- all_ex$Exercise[i+1]
+            } else {
+                all_ex$next_ex[i] <- all_ex$Exercise[i+2]
+            }
+        }
+        # Fill in break row info with following exercise
+        br_rows = which(all_ex$Type == "Break")
+        for(i in br_rows){
+            all_ex$next_ex[i] <- all_ex$next_ex[i-1]
         }
         # Calculate start and stop of each exercise
         all_ex$sum = cumsum(all_ex$ex_time)
@@ -392,7 +410,7 @@ shinyServer(function(input, output, session) {
     # Create table output for exercise list
     output$all_exercises <- renderTable({
         dplyr::select(full_ex_list(), Type, Exercise, Description) %>%
-            filter(Exercise != "Break")
+            filter(Type != "Break")
     })
 
     # Create sweet alert for alerting when workout exercises are not selected
