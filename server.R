@@ -183,6 +183,7 @@ shinyServer(function(input, output, session) {
 
     # Setup reactive values for timers
     timer = reactiveValues(total_length = 0, time_remaining = 0,
+                           ex_countdown_seq = 0, ex_seq_n = 1, current_ex_time = 0,
                            warmup_remaining = 0, workout_remaining = 0, cooldown_remaining = 0,
                            timer_active = FALSE)
 
@@ -341,10 +342,6 @@ shinyServer(function(input, output, session) {
             WO_br_df$next_ex = c(WO_br_df$Exercise[2:nrow(WO_br_df)], "")
             all_ex <- rbind(all_ex, WO_br_df)
         }
-        # if(input$cooldown_number > 0){
-        #     cooldown$ex_time = 40 # CD_ex_length()
-        #     all_ex <- rbind(all_ex, cooldown)
-        # }
         # Calculate start and stop of each exercise
         all_ex$sum = cumsum(all_ex$ex_time)
         all_ex$end = timer$total_length - all_ex$sum
@@ -357,6 +354,28 @@ shinyServer(function(input, output, session) {
     current_exercise <- reactive({
         full_ex_list()[which(full_ex_list()$start >= timer$time_remaining &
                                  full_ex_list()$end < timer$time_remaining),]
+
+    })
+
+    # Alter timer for current exercise
+    observe({
+        ex_timings = full_ex_list()$ex_time
+        times = c()
+        for(i in 1:length(ex_timings)){
+            times <- c(times, seq(from = (ex_timings[i]-1), to = 0, by = -1))
+        }
+        timer$ex_countdown_seq = times
+    })
+    observe({
+        invalidateLater(1000, session)
+        isolate({
+            # If timer is active, reduce all times by 1
+            if(timer$timer_active == TRUE){
+                # Calculate new total time remaining
+                timer$current_ex_time = timer$ex_countdown_seq[timer$ex_seq_n]
+                timer$ex_seq_n <- timer$ex_seq_n + 1
+            }
+        })
     })
 
     # Create text output for current exercise
@@ -364,6 +383,7 @@ shinyServer(function(input, output, session) {
         HTML(paste0("<span style='font-size: 30px'>Current exercise:</span><br>",
                     "<span style='font-size: 22px'>", current_exercise()$Exercise, "</span><br><br>",
                     "<span style='font-size: 16px'>", current_exercise()$Description, "</span><br><br>",
+                    "<span style='font-size: 40px'>", seconds_to_period(timer$current_ex_time), "</span><br><br>",
                     "<span style='font-size: 30px'>Up next:</span><br>",
                     "<span style='font-size: 22px'>", current_exercise()$next_ex, "</span><br><br>"))
     })
