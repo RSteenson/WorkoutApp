@@ -9,7 +9,7 @@ shinyUI(
                 # ".main-header .sidebar-toggle {padding: 0px;}",
                 ".main-header .logo {height: 75px;}",
                 "i {font-size: 30px; padding: 1px;}", # color: red;
-                "hr {border: 2px solid blue}"
+                "hr {border: 2px solid #428bca}"
             )
         ),
 
@@ -176,11 +176,20 @@ shinyUI(
                                    plotOutput("timer_plot", height="200px", width="200px"),
                                    br(), br(),
                                    actionBttn(inputId = "return_setup", label = "Go back to setup",
-                                              style = "simple", color = "primary", size="lg")
+                                              style = "simple", color = "primary", size="lg"),
+                                   br()
                             ),
-                            column(width=9, align="center",
-                                   br(),
-                                   htmlOutput("current_exercise"),
+                            column(width=6, align="center",
+                                   br(), br(),
+                                   htmlOutput("current_ex_timer")
+                                   ),
+                            column(width=3, align="center",
+                                   br(), br(), br(), br(), br(), br(),
+                                   htmlOutput("next_exercise")
+                                   )
+                        ),
+                        fluidRow(
+                            column(width=12, align="center",
                                    hr(),
                                    tableOutput("all_exercises")
                                    )

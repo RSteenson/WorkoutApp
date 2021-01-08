@@ -378,17 +378,18 @@ shinyServer(function(input, output, session) {
         })
     })
 
-    # Create text output for current exercise
-    output$current_exercise <- renderUI({
-        HTML(paste0("<span style='font-size: 30px'>Current exercise:</span><br>",
-                    "<span style='font-size: 22px'>", current_exercise()$Exercise, "</span><br><br>",
-                    "<span style='font-size: 16px'>", current_exercise()$Description, "</span><br><br>",
-                    "<span style='font-size: 40px'>", seconds_to_period(timer$current_ex_time), "</span><br><br>",
-                    "<span style='font-size: 30px'>Up next:</span><br>",
+    # Create text output for workout page
+    output$current_ex_timer <- renderUI({
+        HTML(paste0("<span style='font-size: 150px'>", timer$current_ex_time, "</span><br><br>",
+                    "<span style='font-size: 40px'>", current_exercise()$Exercise, "</span><br><br>",
+                    "<span style='font-size: 26px'>", current_exercise()$Description, "</span><br><br><br><br>"))
+    })
+    output$next_exercise  <- reactive({
+        HTML(paste0("<span style='font-size: 30px'>Up next:</span><br>",
                     "<span style='font-size: 22px'>", current_exercise()$next_ex, "</span><br><br>"))
     })
 
-    # Create text output for all exercises
+    # Create table output for exercise list
     output$all_exercises <- renderTable({
         dplyr::select(full_ex_list(), Type, Exercise, Description) %>%
             filter(Exercise != "Break")
