@@ -188,7 +188,7 @@ shinyServer(function(input, output, session) {
                            ex_countdown_seq = 0, ex_seq_n = 1, current_ex_time = numeric(0),
                            warmup_remaining = 0, workout_remaining = 0, cooldown_remaining = 0,
                            timer_active = FALSE,
-                           countdown_timer = seq(5, 0, -1), cd_seq_n = 1, countdown_timer_active = FALSE)
+                           countdown_timer = seq(5, 1, -1), cd_seq_n = 1, countdown_timer_active = FALSE)
 
     # Calculate the total time
     total_time = reactive({
@@ -305,7 +305,7 @@ shinyServer(function(input, output, session) {
         delay(5000, {
             timer$timer_active <- TRUE
             timer$countdown_timer_active <- FALSE
-            timer$countdown_timer = seq(5, 0, -1)
+            timer$countdown_timer = seq(5, 1, -1)
             timer$cd_seq_n = 1
         })
         })
@@ -411,11 +411,11 @@ shinyServer(function(input, output, session) {
                 timer$current_ex_time = timer$countdown_timer[timer$cd_seq_n]
                 timer$cd_seq_n <- timer$cd_seq_n + 1
                 # If time remaining is 0, switch timer back to being inactive
-                if(timer$countdown_timer_active < 1){
-                    timer$countdown_timer_active = FALSE
-                    timer$countdown_timer = seq(5, 0, -1)
-                    timer$cd_seq_n = 1
-                }
+                # if(timer$current_ex_time < 1){ #timer$timer_active == TRUE){
+                #     timer$countdown_timer_active = FALSE
+                #     timer$countdown_timer = seq(5, 0, -1)
+                #     timer$cd_seq_n = 1
+                # }
             }
             # Workout timer
             if(timer$timer_active == TRUE){
@@ -428,9 +428,15 @@ shinyServer(function(input, output, session) {
 
     # Create text output for workout page
     output$current_ex_timer <- renderUI({
-        HTML(paste0("<span style='font-size: 150px'>", timer$current_ex_time, "</span><br><br>",
-                    "<span style='font-size: 40px'>", current_exercise()$Exercise, "</span><br><br>",
-                    "<span style='font-size: 26px'>", current_exercise()$Description, "</span><br><br><br><br>"))
+        if(timer$countdown_timer_active == TRUE){
+            HTML(paste0("<span style='font-size: 150px; color: red'>", timer$current_ex_time, "</span><br><br>",
+                        "<span style='font-size: 40px'>", current_exercise()$Exercise, "</span><br><br>",
+                        "<span style='font-size: 26px'>", current_exercise()$Description, "</span><br><br><br><br>"))
+        } else {
+            HTML(paste0("<span style='font-size: 150px'>", timer$current_ex_time, "</span><br><br>",
+                        "<span style='font-size: 40px'>", current_exercise()$Exercise, "</span><br><br>",
+                        "<span style='font-size: 26px'>", current_exercise()$Description, "</span><br><br><br><br>"))
+        }
     })
     output$next_exercise  <- reactive({
         HTML(paste0("<span style='font-size: 30px'>Up next:</span><br>",
