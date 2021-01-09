@@ -185,9 +185,10 @@ shinyServer(function(input, output, session) {
 
     # Setup reactive values for timers
     timer = reactiveValues(total_length = 0, time_remaining = 0,
-                           ex_countdown_seq = 0, ex_seq_n = 1, current_ex_time = 0,
+                           ex_countdown_seq = 0, ex_seq_n = 1, current_ex_time = numeric(0),
                            warmup_remaining = 0, workout_remaining = 0, cooldown_remaining = 0,
-                           timer_active = FALSE)
+                           timer_active = FALSE,
+                           countdown_timer = seq(5, 0, -1), cd_seq_n = 1, countdown_timer_active = FALSE)
 
     # Calculate the total time
     total_time = reactive({
@@ -269,7 +270,7 @@ shinyServer(function(input, output, session) {
         p
     })
 
-    # observer that invalidates every second. If timer is active, decrease by one.
+    # Countdown timer
     observe({
         invalidateLater(1000, session)
         isolate({
@@ -300,10 +301,16 @@ shinyServer(function(input, output, session) {
 
     # Observers for action buttons
     observeEvent(input$start_workout, {
-        timer$timer_active = TRUE
+        timer$countdown_timer_active <- TRUE
+        delay(5000, {
+            timer$timer_active <- TRUE
+            timer$countdown_timer_active <- FALSE
+            timer$countdown_timer = seq(5, 0, -1)
+            timer$cd_seq_n = 1
+        })
         })
     observeEvent(input$pause_workout, {
-        timer$timer_active = FALSE
+        timer$timer_active <- FALSE
         })
 
     #----- Create outputs for workout page -------------------------------------
@@ -311,6 +318,7 @@ shinyServer(function(input, output, session) {
     # Create dataframe with all exercises
     full_ex_list <- reactive({
         all_ex <- data.frame()
+        # Add warm-up if selected
         if(input$warmup_number > 0){
             # Create dataframe from objects
             WU_df = data.frame(Type="Warm-up",
@@ -319,6 +327,7 @@ shinyServer(function(input, output, session) {
                                ex_time = WU_ex_length())
             all_ex <- rbind(all_ex, WU_df)
         }
+        # Add workout
         if(input$workout_number > 0){
             # Create dataframe from objects
             WO_df = data.frame(Type="Workout",
@@ -342,6 +351,7 @@ shinyServer(function(input, output, session) {
             }
             all_ex <- rbind(all_ex, WO_br_df)
         }
+        # Add cool-down if selected
         if(input$cooldown_number > 0){
             # Create dataframe from objects
             CD_df = data.frame(Type="Cool-down",
@@ -377,12 +387,12 @@ shinyServer(function(input, output, session) {
 
     # Extract current exercise
     current_exercise <- reactive({
-        full_ex_list()[which(full_ex_list()$start >= timer$time_remaining &
-                                 full_ex_list()$end < timer$time_remaining),]
+        full_ex_list()[which(full_ex_list()$start > timer$time_remaining &
+                                 full_ex_list()$end <= timer$time_remaining),]
 
     })
 
-    # Alter timer for current exercise
+    # Create vector of times that countdown for each exercise
     observe({
         ex_timings = full_ex_list()$ex_time
         times = c()
@@ -391,10 +401,23 @@ shinyServer(function(input, output, session) {
         }
         timer$ex_countdown_seq = times
     })
+
+    # Alter timer for current exercise
     observe({
         invalidateLater(1000, session)
         isolate({
-            # If timer is active, reduce all times by 1
+            # Countdown timer till start
+            if(timer$countdown_timer_active == TRUE){
+                timer$current_ex_time = timer$countdown_timer[timer$cd_seq_n]
+                timer$cd_seq_n <- timer$cd_seq_n + 1
+                # If time remaining is 0, switch timer back to being inactive
+                if(timer$countdown_timer_active < 1){
+                    timer$countdown_timer_active = FALSE
+                    timer$countdown_timer = seq(5, 0, -1)
+                    timer$cd_seq_n = 1
+                }
+            }
+            # Workout timer
             if(timer$timer_active == TRUE){
                 # Calculate new total time remaining
                 timer$current_ex_time = timer$ex_countdown_seq[timer$ex_seq_n]
@@ -417,7 +440,7 @@ shinyServer(function(input, output, session) {
     # Create table output for exercise list
     output$all_exercises <- renderTable({
         dplyr::select(full_ex_list(), Type, Exercise, Description) %>%
-            filter(Type != "Break")
+            filter(Type != "Break" & Type != "Countdown")
     })
 
     # Create sweet alert for alerting when workout exercises are not selected

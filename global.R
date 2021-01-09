@@ -1,5 +1,6 @@
 # Load libraries
 library(shiny)
+library(shinyjs)
 library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyWidgets)

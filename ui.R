@@ -1,6 +1,6 @@
 shinyUI(
     dashboardPagePlus(
-
+        useShinyjs(),
         # Add formatting
         tags$head(
             tags$style(
