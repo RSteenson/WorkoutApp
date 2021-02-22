@@ -24,6 +24,7 @@ shinyUI(
             width = "100px",
             sidebarMenu(
                 id = "tabs",
+                menuItem("", tabName = "Info", icon = icon("info")),
                 menuItem("", tabName = "setup", icon = icon("sliders-h")),
                 menuItem("", tabName = "workout", icon = icon("dumbbell"))
             )
@@ -36,8 +37,43 @@ shinyUI(
         #----- Set body --------------------------------------------------------
         body = dashboardBody(
 
-            #----- Begin setup tab ---------------------------------------------
             tabItems(
+                #----- Begin info tab ---------------------------------------------
+                tabItem(tabName = "Info",
+                        fluidRow(
+                            column(1
+                                   ),
+                            column(width=10,
+                                   box(width=12,
+                                       boxPad(
+                                           color = "blue",
+                                           htmlOutput("HIIT_header")),
+                                       br(),
+                                       column(width=6,
+                                              h3(tags$b("What...?")),
+                                              h4("HIIT workouts are a type of cardiovascular exercise that involve alternating between
+                                              exercise periods and rest periods, with a new exercise after each break period. The idea
+                                              is to increase your heart rate, then partially recover before the next activity."),
+                                              br(),
+                                              img(src='hiit.png', align = "center")
+                                              ),
+                                       column(width=6,
+                                              h3(tags$b("Why HIIT?")),
+                                              h4("So many reasons... but mainly:"),
+                                              h4(tags$ul(
+                                              tags$li("They're a great way to fit a workout into a short space of time, keep you engaged as
+                                              the pace is continually changing, and give you a boost of energy!"),
+                                              tags$li("Even by doing only 20 minutes of HIIT, you can improve your fitness and strength."),
+                                              tags$li("The only real trade-off is that you need to work at a high enough intensity (i.e.
+                                                      push yourself) to compensate for the shorter workout time.")))
+                                       )
+                                   )
+                                   ),
+                            column(1
+                                    )
+                            )
+                        ),
+                #----- Begin setup tab ---------------------------------------------
                 tabItem(tabName = "setup",
 
                         #----- Add action button

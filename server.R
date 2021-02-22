@@ -1,6 +1,7 @@
 shinyServer(function(input, output, session) {
 
     #----- Set headings with HMTL ----------------------------------------------
+    output$HIIT_header = renderUI(HTML(paste0("<center><span style='font-size: 40px; font-weight: bold'>HIIT Workout app</span><br><span style='font-size: 28px;'>(High-Intensity Interval Training)</span></center>")))
     output$WU_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Warm-up</span>")))
     output$WO_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Workout</span>")))
     output$CD_header = renderUI(HTML(paste0("<span style='font-size: 22px; font-weight: bold'>Cool-down</span>")))
